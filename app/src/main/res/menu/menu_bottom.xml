@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_ingresos"
+        android:title="Ingresos"
+        android:icon="@android:drawable/ic_input_add" />
+
+    <item
+        android:id="@+id/nav_egresos"
+        android:title="Egresos"
+        android:icon="@android:drawable/ic_delete" />
+
+    <item
+        android:id="@+id/nav_resumen"
+        android:title="Resumen"
+        android:icon="@android:drawable/ic_menu_info_details" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Cerrar sesión"
+        android:icon="@android:drawable/ic_lock_power_off" />
+
+</menu>
