@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.IngresoViewHolder> {
+/*public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.IngresoViewHolder> {
 
     private List<Ingreso> ingresosList;
     private OnIngresoListener listener;
@@ -60,6 +60,70 @@ public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.Ingres
 
     public void updateList(List<Ingreso> newList) {
         this.ingresosList = newList;
+        notifyDataSetChanged();
+    }
+
+    static class IngresoViewHolder extends RecyclerView.ViewHolder {
+        TextView tvTitulo, tvMonto, tvFecha;
+        Button btnEditar, btnEliminar;
+
+        public IngresoViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvTitulo = itemView.findViewById(R.id.tvTitulo);
+            tvMonto = itemView.findViewById(R.id.tvMonto);
+            tvFecha = itemView.findViewById(R.id.tvFecha);
+            btnEditar = itemView.findViewById(R.id.btnEditar);
+            btnEliminar = itemView.findViewById(R.id.btnEliminar);
+        }
+    }
+}*/
+public class IngresosAdapter extends RecyclerView.Adapter<IngresosAdapter.IngresoViewHolder> {
+
+    private List<Ingreso> ingresosList;
+    private OnIngresoListener listener;
+    private SimpleDateFormat dateFormat;
+    private NumberFormat currencyFormat;
+
+    public interface OnIngresoListener {
+        void onEditIngreso(Ingreso ingreso);
+        void onDeleteIngreso(Ingreso ingreso);
+    }
+
+    public IngresosAdapter(List<Ingreso> ingresosList, OnIngresoListener listener) {
+        this.ingresosList = ingresosList;
+        this.listener = listener;
+        this.dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        this.currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "PE"));
+    }
+
+    @NonNull
+    @Override
+    public IngresoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_ingreso, parent, false);
+        return new IngresoViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull IngresoViewHolder holder, int position) {
+        Ingreso ingreso = ingresosList.get(position);
+
+        holder.tvTitulo.setText(ingreso.getTitulo());
+        holder.tvMonto.setText(currencyFormat.format(ingreso.getMonto()));
+        holder.tvFecha.setText(dateFormat.format(ingreso.getFecha()));
+
+        holder.btnEditar.setOnClickListener(v -> listener.onEditIngreso(ingreso));
+        holder.btnEliminar.setOnClickListener(v -> listener.onDeleteIngreso(ingreso));
+    }
+
+    @Override
+    public int getItemCount() {
+        return ingresosList.size();
+    }
+
+    public void updateList(List<Ingreso> newList) {
+        this.ingresosList.clear();
+        this.ingresosList.addAll(newList);
         notifyDataSetChanged();
     }
 
