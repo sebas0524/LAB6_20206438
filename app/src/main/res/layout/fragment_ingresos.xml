@@ -1,21 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@android:color/white"
     android:padding="16dp">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAgregarIngreso"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="+ Agregar Ingreso"
-        android:layout_marginBottom="16dp" />
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#1976D2"
+        android:iconPadding="8dp"
+        android:iconTint="@android:color/white"
+        android:layout_marginBottom="12dp"
+        style="@style/Widget.MaterialComponents.Button" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewIngresos"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingTop="8dp" />
 
 </LinearLayout>
