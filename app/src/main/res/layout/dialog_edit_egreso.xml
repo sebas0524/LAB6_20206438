@@ -1,31 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:background="#F5F5F5"
     android:padding="16dp">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Solo puedes editar el monto y la descripción"
-        android:textSize="14sp"
-        android:textColor="#666"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        android:padding="20dp"
+        android:layout_margin="8dp"
+        android:clipToPadding="false">
 
-    <EditText
-        android:id="@+id/etMonto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Monto"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="10dp" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Solo puedes editar el monto y la descripción"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="20dp"
+            android:gravity="center" />
 
-    <EditText
-        android:id="@+id/etDescripcion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Descripción (opcional)"
-        android:layout_marginBottom="10dp" />
+        <EditText
+            android:id="@+id/etMonto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Monto"
+            android:inputType="numberDecimal"
+            android:drawableStart="@android:drawable/ic_menu_edit"
+            android:layout_marginBottom="16dp" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/etDescripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Descripción (opcional)"
+            android:inputType="textCapSentences"
+            android:minLines="2"
+            android:maxLines="4"
+            android:drawableStart="@android:drawable/ic_menu_info_details"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+
+</ScrollView>
