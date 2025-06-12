@@ -61,7 +61,7 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private SimpleDateFormat dateFormat;
-    private ListenerRegistration listenerRegistration; // Para manejar el listener
+    private ListenerRegistration listenerRegistration;
 
     @Nullable
     @Override
@@ -69,21 +69,17 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ingresos, container, false);
 
-        // Inicializar Firebase
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
-        // Inicializar vistas
+
         initViews(view);
 
-        // Configurar RecyclerView
         setupRecyclerView();
 
-        // Configurar listeners
         setupListeners();
 
-        // Cargar datos
         loadIngresos();
 
         return view;
@@ -92,7 +88,6 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Limpiar el listener para evitar memory leaks
         if (listenerRegistration != null) {
             listenerRegistration.remove();
         }
@@ -117,12 +112,10 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
     private void loadIngresos() {
         String userId = auth.getCurrentUser().getUid();
 
-        // Limpiar listener anterior si existe
         if (listenerRegistration != null) {
             listenerRegistration.remove();
         }
 
-        // Crear nuevo listener
         listenerRegistration = db.collection("ingresos")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener((value, error) -> {
@@ -138,8 +131,6 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
                             ingreso.setId(doc.getId());
                             ingresosList.add(ingreso);
                         }
-
-                        // Ordenamos manualmente por fecha (más recientes primero)
                         ingresosList.sort((i1, i2) -> i2.getFecha().compareTo(i1.getFecha()));
 
                         adapter.notifyDataSetChanged();

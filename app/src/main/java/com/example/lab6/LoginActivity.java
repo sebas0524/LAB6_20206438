@@ -67,10 +67,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextView tvRegister;
     private FirebaseAuth mAuth;
 
-    // Google Sign-In
     private GoogleSignInClient googleSignInClient;
 
-    // Facebook Login
     private CallbackManager callbackManager;
 
     @Override
@@ -79,19 +77,14 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
 
-        // Inicializar Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // Configurar Google Sign-In
         configureGoogleSignIn();
 
-        // Configurar Facebook Login
         configureFacebookLogin();
 
-        // Inicializar vistas
         initViews();
 
-        // Configurar listeners
         setupListeners();
     }
 
@@ -107,7 +100,6 @@ public class LoginActivity extends AppCompatActivity {
     private void configureFacebookLogin() {
         callbackManager = CallbackManager.Factory.create();
 
-        // Inicializar Facebook SDK si no está inicializado
         if (!FacebookSdk.isInitialized()) {
             FacebookSdk.sdkInitialize(getApplicationContext());
         }
@@ -152,7 +144,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
     private void loginWithFacebook() {
-        // CAMBIO: Removido "email" del array de permisos
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile"));
 
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -180,7 +171,6 @@ public class LoginActivity extends AppCompatActivity {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        // Validaciones básicas
         if (TextUtils.isEmpty(email)) {
             etEmail.setError("El email es requerido");
             return;
@@ -195,23 +185,18 @@ public class LoginActivity extends AppCompatActivity {
             etPassword.setError("La contraseña debe tener al menos 6 caracteres");
             return;
         }
-
-        // Iniciar sesión con Firebase
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Login exitoso
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "Bienvenido!", Toast.LENGTH_SHORT).show();
 
-                            // Ir a la actividad principal
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
                         } else {
-                            // Error en el login
                             Toast.makeText(LoginActivity.this, "Error: " + task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
                         }
@@ -233,18 +218,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "Bienvenido " + user.getDisplayName() + "!",
                                     Toast.LENGTH_SHORT).show();
 
-                            // Ir a la actividad principal
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
                         } else {
-                            // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Error de autenticación con Facebook.",
                                     Toast.LENGTH_SHORT).show();
@@ -257,21 +239,17 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
                 Toast.makeText(this, "Error de Google Sign-In", Toast.LENGTH_SHORT).show();
             }
         } else {
-            // Pass the activity result back to the Facebook SDK
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -283,18 +261,15 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "Bienvenido " + user.getDisplayName() + "!",
                                     Toast.LENGTH_SHORT).show();
 
-                            // Ir a la actividad principal
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
                         } else {
-                            // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Error de autenticación con Google.",
                                     Toast.LENGTH_SHORT).show();
@@ -306,10 +281,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Verificar si el usuario ya está logueado
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // Usuario ya logueado, ir a MainActivity
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }

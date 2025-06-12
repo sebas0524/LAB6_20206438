@@ -41,13 +41,10 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Inicializar Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // Inicializar vistas
         initViews();
 
-        // Configurar listeners
         setupListeners();
     }
 
@@ -70,7 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
         tvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish(); // Volver al LoginActivity
+                finish();
             }
         });
     }
@@ -80,7 +77,6 @@ public class RegisterActivity extends AppCompatActivity {
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-        // Validaciones
         if (TextUtils.isEmpty(email)) {
             etEmail.setError("El email es requerido");
             return;
@@ -105,24 +101,21 @@ public class RegisterActivity extends AppCompatActivity {
             etConfirmPassword.setError("Las contraseñas no coinciden");
             return;
         }
-
-        // Crear usuario con Firebase
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Registro exitoso
+
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(RegisterActivity.this, "Usuario registrado exitosamente!",
                                     Toast.LENGTH_SHORT).show();
 
-                            // Ir a la actividad principal
                             Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
                         } else {
-                            // Error en el registro
+
                             Toast.makeText(RegisterActivity.this, "Error: " + task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
                         }

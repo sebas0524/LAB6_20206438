@@ -11,7 +11,7 @@ public class Egreso {
     private String userId;
 
     public Egreso() {
-        // Constructor vacío requerido por Firebase
+
     }
 
     public Egreso(String titulo, double monto, String descripcion, Date fecha, String userId) {

@@ -15,8 +15,6 @@
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:backgroundTint="#1976D2"
-        android:iconPadding="8dp"
-        android:iconTint="@android:color/white"
         android:layout_marginBottom="12dp"
         style="@style/Widget.MaterialComponents.Button" />
 

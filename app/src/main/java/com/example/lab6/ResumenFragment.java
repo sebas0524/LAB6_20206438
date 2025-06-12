@@ -60,27 +60,20 @@ public class ResumenFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_resumen, container, false);
 
-        // Inicializar Firebase
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // Inicializar formatos
         monthYearFormat = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
         currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "PE"));
 
-        // Inicializar calendario con el mes actual
         selectedCalendar = Calendar.getInstance();
 
-        // Inicializar vistas
         initViews(view);
 
-        // Configurar listeners
         setupListeners();
 
-        // Configurar gráficos
         setupCharts();
 
-        // Cargar datos del mes actual
         loadDataForSelectedMonth();
 
         return view;
@@ -94,8 +87,6 @@ public class ResumenFragment extends Fragment {
         btnSeleccionarMes = view.findViewById(R.id.btnSeleccionarMes);
         pieChart = view.findViewById(R.id.pieChart);
         barChart = view.findViewById(R.id.barChart);
-
-        // Mostrar el mes actual
         tvMesSeleccionado.setText(monthYearFormat.format(selectedCalendar.getTime()));
     }
 
@@ -104,7 +95,6 @@ public class ResumenFragment extends Fragment {
     }
 
     private void setupCharts() {
-        // Configurar PieChart
         pieChart.setUsePercentValues(true);
         pieChart.getDescription().setEnabled(false);
         pieChart.setExtraOffsets(5, 10, 5, 5);
@@ -119,7 +109,6 @@ public class ResumenFragment extends Fragment {
         pieChart.setRotationEnabled(true);
         pieChart.setHighlightPerTapEnabled(true);
 
-        // Configurar BarChart
         barChart.getDescription().setEnabled(false);
         barChart.setMaxVisibleValueCount(60);
         barChart.setPinchZoom(false);
@@ -161,7 +150,6 @@ public class ResumenFragment extends Fragment {
     private void loadDataForSelectedMonth() {
         String userId = auth.getCurrentUser().getUid();
 
-        // Obtener el primer y último día del mes seleccionado
         Calendar startOfMonth = (Calendar) selectedCalendar.clone();
         startOfMonth.set(Calendar.DAY_OF_MONTH, 1);
         startOfMonth.set(Calendar.HOUR_OF_DAY, 0);
@@ -179,12 +167,10 @@ public class ResumenFragment extends Fragment {
         Date startDate = startOfMonth.getTime();
         Date endDate = endOfMonth.getTime();
 
-        // Cargar ingresos del mes
         loadIngresosForMonth(userId, startDate, endDate);
     }
 
     private void loadIngresosForMonth(String userId, Date startDate, Date endDate) {
-        // Consulta simplificada sin orderBy para evitar el índice compuesto
         db.collection("ingresos")
                 .whereEqualTo("userId", userId)
                 .get()
@@ -192,8 +178,6 @@ public class ResumenFragment extends Fragment {
                     totalIngresos = 0;
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Ingreso ingreso = doc.toObject(Ingreso.class);
-
-                        // Filtrar por fecha en el código
                         if (ingreso.getFecha() != null &&
                                 ingreso.getFecha().compareTo(startDate) >= 0 &&
                                 ingreso.getFecha().compareTo(endDate) <= 0) {
@@ -201,7 +185,6 @@ public class ResumenFragment extends Fragment {
                         }
                     }
 
-                    // Después de cargar ingresos, cargar egresos
                     loadEgresosForMonth(userId, startDate, endDate);
                 })
                 .addOnFailureListener(e -> {
@@ -210,7 +193,6 @@ public class ResumenFragment extends Fragment {
     }
 
     private void loadEgresosForMonth(String userId, Date startDate, Date endDate) {
-        // Consulta simplificada sin orderBy para evitar el índice compuesto
         db.collection("egresos")
                 .whereEqualTo("userId", userId)
                 .get()
@@ -219,7 +201,6 @@ public class ResumenFragment extends Fragment {
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Egreso egreso = doc.toObject(Egreso.class);
 
-                        // Filtrar por fecha en el código
                         if (egreso.getFecha() != null &&
                                 egreso.getFecha().compareTo(startDate) >= 0 &&
                                 egreso.getFecha().compareTo(endDate) <= 0) {
@@ -227,7 +208,6 @@ public class ResumenFragment extends Fragment {
                         }
                     }
 
-                    // Actualizar UI con los datos obtenidos
                     updateUI();
                 })
                 .addOnFailureListener(e -> {
@@ -236,7 +216,6 @@ public class ResumenFragment extends Fragment {
     }
 
     private void updateUI() {
-        // Actualizar textos de resumen
         tvTotalIngresos.setText("Ingresos: " + currencyFormat.format(totalIngresos));
         tvTotalEgresos.setText("Egresos: " + currencyFormat.format(totalEgresos));
 
@@ -244,7 +223,6 @@ public class ResumenFragment extends Fragment {
         tvBalance.setText("Balance: " + currencyFormat.format(balance));
         tvBalance.setTextColor(balance >= 0 ? Color.GREEN : Color.RED);
 
-        // Actualizar gráficos
         updatePieChart();
         updateBarChart();
     }
@@ -272,11 +250,10 @@ public class ResumenFragment extends Fragment {
         dataSet.setSliceSpace(3f);
         dataSet.setSelectionShift(5f);
 
-        // Colores personalizados
         ArrayList<Integer> colors = new ArrayList<>();
-        colors.add(Color.rgb(76, 175, 80));  // Verde para ingresos
-        colors.add(Color.rgb(244, 67, 54));  // Rojo para egresos
-        colors.add(Color.GRAY);              // Gris para "sin datos"
+        colors.add(Color.rgb(76, 175, 80));
+        colors.add(Color.rgb(244, 67, 54));
+        colors.add(Color.GRAY);
         dataSet.setColors(colors);
 
         PieData data = new PieData(dataSet);
@@ -290,24 +267,22 @@ public class ResumenFragment extends Fragment {
     private void updateBarChart() {
         ArrayList<BarEntry> entries = new ArrayList<>();
 
-        // Datos para el gráfico de barras
-        entries.add(new BarEntry(0f, (float) totalIngresos));  // Ingresos
-        entries.add(new BarEntry(1f, (float) totalEgresos));   // Egresos
-        entries.add(new BarEntry(2f, (float) (totalIngresos - totalEgresos))); // Balance
+
+        entries.add(new BarEntry(0f, (float) totalIngresos));
+        entries.add(new BarEntry(1f, (float) totalEgresos));
+        entries.add(new BarEntry(2f, (float) (totalIngresos - totalEgresos)));
 
         BarDataSet dataSet = new BarDataSet(entries, "Montos");
 
-        // Colores para las barras
         ArrayList<Integer> colors = new ArrayList<>();
-        colors.add(Color.rgb(76, 175, 80));  // Verde para ingresos
-        colors.add(Color.rgb(244, 67, 54));  // Rojo para egresos
-        colors.add(totalIngresos >= totalEgresos ? Color.rgb(33, 150, 243) : Color.rgb(255, 152, 0)); // Azul/Naranja para balance
+        colors.add(Color.rgb(76, 175, 80));
+        colors.add(Color.rgb(244, 67, 54));
+        colors.add(totalIngresos >= totalEgresos ? Color.rgb(33, 150, 243) : Color.rgb(255, 152, 0));
         dataSet.setColors(colors);
 
         BarData data = new BarData(dataSet);
         data.setBarWidth(0.5f);
 
-        // Etiquetas del eje X
         String[] labels = {"Ingresos", "Egresos", "Balance"};
         barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
 
