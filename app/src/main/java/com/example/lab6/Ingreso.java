@@ -9,17 +9,31 @@ public class Ingreso {
     private String descripcion;
     private Date fecha;
     private String userId;
+    private String comprobanteUrl;
+    private String comprobantePublicId;
+    private String comprobanteNombre;
 
     public Ingreso() {
 
     }
 
-    public Ingreso(String titulo, double monto, String descripcion, Date fecha, String userId) {
+    /*public Ingreso(String titulo, double monto, String descripcion, Date fecha, String userId) {
         this.titulo = titulo;
         this.monto = monto;
         this.descripcion = descripcion;
         this.fecha = fecha;
         this.userId = userId;
+    }*/
+    public Ingreso(String titulo, double monto, String descripcion, Date fecha, String userId,
+                   String comprobanteUrl, String comprobantePublicId, String comprobanteNombre) {
+        this.titulo = titulo;
+        this.monto = monto;
+        this.descripcion = descripcion;
+        this.fecha = fecha;
+        this.userId = userId;
+        this.comprobanteUrl = comprobanteUrl;
+        this.comprobantePublicId = comprobantePublicId;
+        this.comprobanteNombre = comprobanteNombre;
     }
 
     // Getters y Setters
@@ -69,5 +83,33 @@ public class Ingreso {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+    public String getComprobanteUrl() {
+        return comprobanteUrl;
+    }
+
+    public void setComprobanteUrl(String comprobanteUrl) {
+        this.comprobanteUrl = comprobanteUrl;
+    }
+
+    public String getComprobantePublicId() {
+        return comprobantePublicId;
+    }
+
+    public void setComprobantePublicId(String comprobantePublicId) {
+        this.comprobantePublicId = comprobantePublicId;
+    }
+
+    public String getComprobanteNombre() {
+        return comprobanteNombre;
+    }
+
+    public void setComprobanteNombre(String comprobanteNombre) {
+        this.comprobanteNombre = comprobanteNombre;
+    }
+
+    // Método de utilidad
+    public boolean tieneComprobante() {
+        return comprobanteUrl != null && !comprobanteUrl.isEmpty();
     }
 }

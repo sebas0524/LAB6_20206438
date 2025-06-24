@@ -100,6 +100,51 @@
                 android:paddingHorizontal="16dp" />
 
         </LinearLayout>
+        <!-- Sección del comprobante -->
+        <LinearLayout
+            android:id="@+id/layoutComprobante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp"
+            android:padding="8dp"
+            android:background="#F5F5F5"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:tint="#757575" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Comprobante disponible"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:layout_gravity="center_vertical" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDescargarComprobante"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="Descargar"
+                android:textSize="10sp"
+                android:textColor="#1976D2"
+                app:icon="@android:drawable/stat_sys_download"
+                app:iconTint="#1976D2"
+                app:iconSize="14dp"
+                android:paddingHorizontal="12dp"
+                android:minHeight="0dp"
+                android:minWidth="0dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

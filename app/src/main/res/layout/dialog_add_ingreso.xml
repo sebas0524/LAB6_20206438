@@ -51,6 +51,65 @@
             android:clickable="true"
             android:drawableEnd="@android:drawable/ic_menu_my_calendar"
             android:layout_marginBottom="12dp" />
+        <!-- Sección de Comprobante -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Comprobante *"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btnSeleccionarComprobante"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Seleccionar Imagen"
+            android:drawableLeft="@android:drawable/ic_menu_camera"
+            android:drawablePadding="8dp"
+            android:layout_marginBottom="12dp"
+            android:backgroundTint="@android:color/holo_blue_light" />
+
+        <!-- Vista previa de la imagen -->
+        <FrameLayout
+            android:id="@+id/framePreview"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="12dp"
+            android:background="#E0E0E0"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivPreviewComprobante"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:layout_margin="4dp" />
+
+            <Button
+                android:id="@+id/btnRemoverComprobante"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:text="×"
+                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:background="@android:color/holo_red_dark" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvNombreArchivo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 

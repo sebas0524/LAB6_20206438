@@ -22,9 +22,14 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
     private SimpleDateFormat dateFormat;
     private NumberFormat currencyFormat;
 
+    /*public interface OnEgresoListener {
+        void onEditEgreso(Egreso egreso);
+        void onDeleteEgreso(Egreso egreso);
+    }*/
     public interface OnEgresoListener {
         void onEditEgreso(Egreso egreso);
         void onDeleteEgreso(Egreso egreso);
+        void onDownloadComprobante(Egreso egreso); // Nueva línea
     }
 
     public EgresosAdapter(List<Egreso> egresosList, OnEgresoListener listener) {
@@ -42,6 +47,17 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
         return new EgresoViewHolder(view);
     }
 
+    /*@Override
+    public void onBindViewHolder(@NonNull EgresoViewHolder holder, int position) {
+        Egreso egreso = egresosList.get(position);
+
+        holder.tvTitulo.setText(egreso.getTitulo());
+        holder.tvMonto.setText(currencyFormat.format(egreso.getMonto()));
+        holder.tvFecha.setText(dateFormat.format(egreso.getFecha()));
+
+        holder.btnEditar.setOnClickListener(v -> listener.onEditEgreso(egreso));
+        holder.btnEliminar.setOnClickListener(v -> listener.onDeleteEgreso(egreso));
+    }*/
     @Override
     public void onBindViewHolder(@NonNull EgresoViewHolder holder, int position) {
         Egreso egreso = egresosList.get(position);
@@ -49,6 +65,14 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
         holder.tvTitulo.setText(egreso.getTitulo());
         holder.tvMonto.setText(currencyFormat.format(egreso.getMonto()));
         holder.tvFecha.setText(dateFormat.format(egreso.getFecha()));
+
+        // Mostrar/ocultar sección de comprobante
+        if (egreso.tieneComprobante()) {
+            holder.layoutComprobante.setVisibility(View.VISIBLE);
+            holder.btnDescargarComprobante.setOnClickListener(v -> listener.onDownloadComprobante(egreso));
+        } else {
+            holder.layoutComprobante.setVisibility(View.GONE);
+        }
 
         holder.btnEditar.setOnClickListener(v -> listener.onEditEgreso(egreso));
         holder.btnEliminar.setOnClickListener(v -> listener.onDeleteEgreso(egreso));
@@ -65,7 +89,7 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
         notifyDataSetChanged();
     }
 
-    static class EgresoViewHolder extends RecyclerView.ViewHolder {
+    /*static class EgresoViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitulo, tvMonto, tvFecha;
         Button btnEditar, btnEliminar;
 
@@ -76,6 +100,22 @@ public class EgresosAdapter extends RecyclerView.Adapter<EgresosAdapter.EgresoVi
             tvFecha = itemView.findViewById(R.id.tvFecha);
             btnEditar = itemView.findViewById(R.id.btnEditar);
             btnEliminar = itemView.findViewById(R.id.btnEliminar);
+        }
+    }*/
+    static class EgresoViewHolder extends RecyclerView.ViewHolder {
+        TextView tvTitulo, tvMonto, tvFecha;
+        Button btnEditar, btnEliminar, btnDescargarComprobante;
+        View layoutComprobante;
+
+        public EgresoViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvTitulo = itemView.findViewById(R.id.tvTitulo);
+            tvMonto = itemView.findViewById(R.id.tvMonto);
+            tvFecha = itemView.findViewById(R.id.tvFecha);
+            btnEditar = itemView.findViewById(R.id.btnEditar);
+            btnEliminar = itemView.findViewById(R.id.btnEliminar);
+            btnDescargarComprobante = itemView.findViewById(R.id.btnDescargarComprobante);
+            layoutComprobante = itemView.findViewById(R.id.layoutComprobante);
         }
     }
 }

@@ -49,7 +49,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
+import com.bumptech.glide.Glide;
 
 public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngresoListener {
 
@@ -62,8 +71,18 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
     private FirebaseAuth auth;
     private SimpleDateFormat dateFormat;
     private ListenerRegistration listenerRegistration;
+    private ServicioAlmacenamiento servicioAlmacenamiento;
+    private Uri selectedImageUri;
+    private ImageView ivPreviewComprobante;
+    private FrameLayout framePreview;
+    private TextView tvNombreArchivo;
+    private Button btnSeleccionarComprobante, btnRemoverComprobante;
 
-    @Nullable
+    // ActivityResultLauncher para seleccionar imagen
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private ActivityResultLauncher<String> permissionLauncher;
+
+    /*@Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -83,13 +102,102 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
         loadIngresos();
 
         return view;
+    }*/
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_ingresos, container, false);
+
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+        dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+        // Inicializar servicio de almacenamiento
+        servicioAlmacenamiento = new ServicioAlmacenamiento(getContext());
+
+        // Inicializar launchers
+        initLaunchers();
+
+        initViews(view);
+        setupRecyclerView();
+        setupListeners();
+        loadIngresos();
+
+        return view;
+    }
+    private void initLaunchers() {
+        // Launcher para seleccionar imagen
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == getActivity().RESULT_OK && result.getData() != null) {
+                        selectedImageUri = result.getData().getData();
+                        if (selectedImageUri != null) {
+                            mostrarPreviewImagen(selectedImageUri);
+                        }
+                    }
+                }
+        );
+
+        // Launcher para permisos
+        permissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        abrirSelectorImagen();
+                    } else {
+                        Toast.makeText(getContext(), "Permiso denegado para acceder a las imágenes", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
+    private void mostrarPreviewImagen(Uri imageUri) {
+        framePreview.setVisibility(View.VISIBLE);
+        tvNombreArchivo.setVisibility(View.VISIBLE);
+
+        // Cargar imagen con Glide
+        Glide.with(this)
+                .load(imageUri)
+                .centerCrop()
+                .into(ivPreviewComprobante);
+
+        // Mostrar nombre del archivo
+        String fileName = "Imagen_" + System.currentTimeMillis() + ".jpg";
+        tvNombreArchivo.setText("Archivo: " + fileName);
+    }
+
+    private void abrirSelectorImagen() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        imagePickerLauncher.launch(intent);
+    }
+
+    private void solicitarPermisosImagen() {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_MEDIA_IMAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
+        } else {
+            abrirSelectorImagen();
+        }
+    }
+
+    /*@Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (listenerRegistration != null) {
+            listenerRegistration.remove();
+        }
+    }*/
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (listenerRegistration != null) {
             listenerRegistration.remove();
+        }
+        if (servicioAlmacenamiento != null) {
+            servicioAlmacenamiento.limpiarRecursos();
         }
     }
 
@@ -138,7 +246,7 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
                 });
     }
 
-    private void showAddIngresoDialog() {
+    /*private void showAddIngresoDialog() {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_ingreso, null);
 
         EditText etTitulo = dialogView.findViewById(R.id.etTitulo);
@@ -173,6 +281,71 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
 
                         Ingreso ingreso = new Ingreso(titulo, monto, descripcion, fecha, userId);
                         addIngreso(ingreso);
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }*/
+    private void showAddIngresoDialog() {
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_ingreso, null);
+
+        EditText etTitulo = dialogView.findViewById(R.id.etTitulo);
+        EditText etMonto = dialogView.findViewById(R.id.etMonto);
+        EditText etDescripcion = dialogView.findViewById(R.id.etDescripcion);
+        EditText etFecha = dialogView.findViewById(R.id.etFecha);
+
+        // Referencias a elementos del comprobante
+        btnSeleccionarComprobante = dialogView.findViewById(R.id.btnSeleccionarComprobante);
+        framePreview = dialogView.findViewById(R.id.framePreview);
+        ivPreviewComprobante = dialogView.findViewById(R.id.ivPreviewComprobante);
+        btnRemoverComprobante = dialogView.findViewById(R.id.btnRemoverComprobante);
+        tvNombreArchivo = dialogView.findViewById(R.id.tvNombreArchivo);
+
+        // Reset de imagen seleccionada
+        selectedImageUri = null;
+        framePreview.setVisibility(View.GONE);
+        tvNombreArchivo.setVisibility(View.GONE);
+
+        Calendar calendar = Calendar.getInstance();
+        etFecha.setText(dateFormat.format(calendar.getTime()));
+
+        // Configurar listeners
+        etFecha.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
+                    (view, year, month, dayOfMonth) -> {
+                        calendar.set(year, month, dayOfMonth);
+                        etFecha.setText(dateFormat.format(calendar.getTime()));
+                    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+            datePickerDialog.show();
+        });
+
+        btnSeleccionarComprobante.setOnClickListener(v -> solicitarPermisosImagen());
+
+        btnRemoverComprobante.setOnClickListener(v -> {
+            selectedImageUri = null;
+            framePreview.setVisibility(View.GONE);
+            tvNombreArchivo.setVisibility(View.GONE);
+        });
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Agregar Ingreso")
+                .setView(dialogView)
+                .setPositiveButton("Agregar", (dialog, which) -> {
+                    String titulo = etTitulo.getText().toString().trim();
+                    String montoStr = etMonto.getText().toString().trim();
+                    String descripcion = etDescripcion.getText().toString().trim();
+
+                    if (validateInputWithImage(titulo, montoStr)) {
+                        double monto = Double.parseDouble(montoStr);
+                        Date fecha = calendar.getTime();
+                        String userId = auth.getCurrentUser().getUid();
+
+                        if (selectedImageUri != null) {
+                            // Subir imagen primero, luego crear ingreso
+                            subirImagenYCrearIngreso(titulo, monto, descripcion, fecha, userId);
+                        } else {
+                            Toast.makeText(getContext(), "El comprobante es requerido", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setNegativeButton("Cancelar", null)
@@ -271,5 +444,73 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
         }
 
         return true;
+    }
+    private void subirImagenYCrearIngreso(String titulo, double monto, String descripcion, Date fecha, String userId) {
+        String nombreArchivo = "ingreso_" + System.currentTimeMillis();
+
+        servicioAlmacenamiento.guardarArchivo(selectedImageUri, nombreArchivo, new ServicioAlmacenamiento.CloudinaryCallback() {
+            @Override
+            public void onSuccess(String url, String publicId) {
+                // Crear ingreso con información del comprobante
+                Ingreso ingreso = new Ingreso(titulo, monto, descripcion, fecha, userId, url, publicId, nombreArchivo);
+                addIngreso(ingreso);
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(getContext(), "Error al subir comprobante: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private boolean validateInputWithImage(String titulo, String montoStr) {
+        if (TextUtils.isEmpty(titulo)) {
+            Toast.makeText(getContext(), "El título es requerido", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (TextUtils.isEmpty(montoStr)) {
+            Toast.makeText(getContext(), "El monto es requerido", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (selectedImageUri == null) {
+            Toast.makeText(getContext(), "El comprobante es requerido", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        try {
+            double monto = Double.parseDouble(montoStr);
+            if (monto <= 0) {
+                Toast.makeText(getContext(), "El monto debe ser mayor a 0", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(getContext(), "Monto inválido", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+    @Override
+    public void onDownloadComprobante(Ingreso ingreso) {
+        if (ingreso.tieneComprobante()) {
+            servicioAlmacenamiento.descargarArchivo(ingreso.getComprobantePublicId(),
+                    ingreso.getComprobanteNombre(), new ServicioAlmacenamiento.CloudinaryCallback() {
+                        @Override
+                        public void onSuccess(String url, String fileName) {
+                            // Abrir la imagen en el navegador o galería
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setData(Uri.parse(url));
+                            startActivity(intent);
+                            Toast.makeText(getContext(), "Comprobante abierto", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Toast.makeText(getContext(), "Error al descargar: " + error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
     }
 }
