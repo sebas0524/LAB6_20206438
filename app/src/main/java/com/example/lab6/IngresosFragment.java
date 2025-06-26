@@ -1,7 +1,10 @@
 package com.example.lab6;
 
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.*;
 import android.widget.Toast;
 
@@ -499,11 +502,7 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
                     ingreso.getComprobanteNombre(), new ServicioAlmacenamiento.CloudinaryCallback() {
                         @Override
                         public void onSuccess(String url, String fileName) {
-                            // Abrir la imagen en el navegador o galería
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse(url));
-                            startActivity(intent);
-                            Toast.makeText(getContext(), "Comprobante abierto", Toast.LENGTH_SHORT).show();
+                            descargarImagenAlDispositivo(url, fileName);
                         }
 
                         @Override
@@ -511,6 +510,23 @@ public class IngresosFragment extends Fragment implements IngresosAdapter.OnIngr
                             Toast.makeText(getContext(), "Error al descargar: " + error, Toast.LENGTH_SHORT).show();
                         }
                     });
+        }
+    }
+
+    private void descargarImagenAlDispositivo(String imageUrl, String fileName) {
+        try {
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(imageUrl));
+            request.setTitle("Descargando comprobante");
+            request.setDescription("Descargando " + fileName);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName + ".jpg");
+
+            DownloadManager downloadManager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            downloadManager.enqueue(request);
+
+            Toast.makeText(getContext(), "Descarga iniciada. Revisa tu carpeta Downloads", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Error al iniciar descarga: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -1,6 +1,9 @@
 package com.example.lab6;
 
+import android.app.DownloadManager;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,27 +78,7 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
     private ActivityResultLauncher<Intent> imagePickerLauncher;
     private ActivityResultLauncher<String> permissionLauncher;
 
-    /*@Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_egresos, container, false);
 
-
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-        dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-
-        initViews(view);
-
-        setupRecyclerView();
-
-        setupListeners();
-
-        loadEgresos();
-
-        return view;
-    }*/
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -106,12 +89,9 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
         auth = FirebaseAuth.getInstance();
         dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
-        // Inicializar servicio de almacenamiento
         servicioAlmacenamiento = new ServicioAlmacenamiento(getContext());
 
-        // Inicializar launchers
         initLaunchers();
-
         initViews(view);
         setupRecyclerView();
         setupListeners();
@@ -120,7 +100,6 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
         return view;
     }
     private void initLaunchers() {
-        // Launcher para seleccionar imagen
         imagePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -133,7 +112,6 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
                 }
         );
 
-        // Launcher para permisos
         permissionLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 isGranted -> {
@@ -149,13 +127,11 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
         framePreview.setVisibility(View.VISIBLE);
         tvNombreArchivo.setVisibility(View.VISIBLE);
 
-        // Cargar imagen con Glide
         Glide.with(this)
                 .load(imageUri)
                 .centerCrop()
                 .into(ivPreviewComprobante);
 
-        // Mostrar nombre del archivo
         String fileName = "Imagen_" + System.currentTimeMillis() + ".jpg";
         tvNombreArchivo.setText("Archivo: " + fileName);
     }
@@ -175,13 +151,6 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
         }
     }
 
-    /*@Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (listenerRegistration != null) {
-            listenerRegistration.remove();
-        }
-    }*/
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -234,47 +203,6 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
                     }
                 });
     }
-
-    /*private void showAddEgresoDialog() {
-        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_egreso, null);
-
-        EditText etTitulo = dialogView.findViewById(R.id.etTitulo);
-        EditText etMonto = dialogView.findViewById(R.id.etMonto);
-        EditText etDescripcion = dialogView.findViewById(R.id.etDescripcion);
-        EditText etFecha = dialogView.findViewById(R.id.etFecha);
-
-        Calendar calendar = Calendar.getInstance();
-        etFecha.setText(dateFormat.format(calendar.getTime()));
-
-        etFecha.setOnClickListener(v -> {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
-                    (view, year, month, dayOfMonth) -> {
-                        calendar.set(year, month, dayOfMonth);
-                        etFecha.setText(dateFormat.format(calendar.getTime()));
-                    }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-            datePickerDialog.show();
-        });
-
-        new AlertDialog.Builder(getContext())
-                .setTitle("Agregar Egreso")
-                .setView(dialogView)
-                .setPositiveButton("Agregar", (dialog, which) -> {
-                    String titulo = etTitulo.getText().toString().trim();
-                    String montoStr = etMonto.getText().toString().trim();
-                    String descripcion = etDescripcion.getText().toString().trim();
-
-                    if (validateInput(titulo, montoStr)) {
-                        double monto = Double.parseDouble(montoStr);
-                        Date fecha = calendar.getTime();
-                        String userId = auth.getCurrentUser().getUid();
-
-                        Egreso egreso = new Egreso(titulo, monto, descripcion, fecha, userId);
-                        addEgreso(egreso);
-                    }
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
-    }*/
     private void showAddEgresoDialog() {
         View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_egreso, null);
 
@@ -283,14 +211,13 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
         EditText etDescripcion = dialogView.findViewById(R.id.etDescripcion);
         EditText etFecha = dialogView.findViewById(R.id.etFecha);
 
-        // Referencias a elementos del comprobante
+
         btnSeleccionarComprobante = dialogView.findViewById(R.id.btnSeleccionarComprobante);
         framePreview = dialogView.findViewById(R.id.framePreview);
         ivPreviewComprobante = dialogView.findViewById(R.id.ivPreviewComprobante);
         btnRemoverComprobante = dialogView.findViewById(R.id.btnRemoverComprobante);
         tvNombreArchivo = dialogView.findViewById(R.id.tvNombreArchivo);
 
-        // Reset de imagen seleccionada
         selectedImageUri = null;
         framePreview.setVisibility(View.GONE);
         tvNombreArchivo.setVisibility(View.GONE);
@@ -298,7 +225,6 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
         Calendar calendar = Calendar.getInstance();
         etFecha.setText(dateFormat.format(calendar.getTime()));
 
-        // Configurar listeners
         etFecha.setOnClickListener(v -> {
             DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
                     (view, year, month, dayOfMonth) -> {
@@ -488,11 +414,8 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
                     egreso.getComprobanteNombre(), new ServicioAlmacenamiento.CloudinaryCallback() {
                         @Override
                         public void onSuccess(String url, String fileName) {
-                            // Abrir la imagen en el navegador o galería
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse(url));
-                            startActivity(intent);
-                            Toast.makeText(getContext(), "Comprobante abierto", Toast.LENGTH_SHORT).show();
+                            // Descargar la imagen realmente al dispositivo
+                            descargarImagenAlDispositivo(url, fileName);
                         }
 
                         @Override
@@ -500,6 +423,23 @@ public class EgresosFragment extends Fragment implements EgresosAdapter.OnEgreso
                             Toast.makeText(getContext(), "Error al descargar: " + error, Toast.LENGTH_SHORT).show();
                         }
                     });
+        }
+    }
+
+    private void descargarImagenAlDispositivo(String imageUrl, String fileName) {
+        try {
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(imageUrl));
+            request.setTitle("Descargando comprobante");
+            request.setDescription("Descargando " + fileName);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName + ".jpg");
+
+            DownloadManager downloadManager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            downloadManager.enqueue(request);
+
+            Toast.makeText(getContext(), "Descarga iniciada. Revisa tu carpeta Downloads", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Error al iniciar descarga: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }

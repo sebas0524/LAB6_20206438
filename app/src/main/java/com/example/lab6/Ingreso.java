@@ -17,13 +17,6 @@ public class Ingreso {
 
     }
 
-    /*public Ingreso(String titulo, double monto, String descripcion, Date fecha, String userId) {
-        this.titulo = titulo;
-        this.monto = monto;
-        this.descripcion = descripcion;
-        this.fecha = fecha;
-        this.userId = userId;
-    }*/
     public Ingreso(String titulo, double monto, String descripcion, Date fecha, String userId,
                    String comprobanteUrl, String comprobantePublicId, String comprobanteNombre) {
         this.titulo = titulo;
@@ -36,7 +29,6 @@ public class Ingreso {
         this.comprobanteNombre = comprobanteNombre;
     }
 
-    // Getters y Setters
     public String getId() {
         return id;
     }
@@ -107,8 +99,6 @@ public class Ingreso {
     public void setComprobanteNombre(String comprobanteNombre) {
         this.comprobanteNombre = comprobanteNombre;
     }
-
-    // Método de utilidad
     public boolean tieneComprobante() {
         return comprobanteUrl != null && !comprobanteUrl.isEmpty();
     }

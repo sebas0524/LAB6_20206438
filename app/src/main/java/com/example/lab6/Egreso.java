@@ -17,13 +17,6 @@ public class Egreso {
 
     }
 
-    /*public Egreso(String titulo, double monto, String descripcion, Date fecha, String userId) {
-        this.titulo = titulo;
-        this.monto = monto;
-        this.descripcion = descripcion;
-        this.fecha = fecha;
-        this.userId = userId;
-    }*/
     public Egreso(String titulo, double monto, String descripcion, Date fecha, String userId,
                   String comprobanteUrl, String comprobantePublicId, String comprobanteNombre) {
         this.titulo = titulo;
@@ -107,7 +100,6 @@ public class Egreso {
         this.comprobanteNombre = comprobanteNombre;
     }
 
-    // Método de utilidad
     public boolean tieneComprobante() {
         return comprobanteUrl != null && !comprobanteUrl.isEmpty();
     }
